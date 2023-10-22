@@ -10,15 +10,155 @@ const client = new Client({
   node: "http://localhost:9200",
 });
 
-app.get("/health", async(req, res)=> {
+app.get("/health", async (req, res) => {
   const health = await client.cluster.health();
   res.json(health);
-})
+});
+
+// add a custom function
+function getModifiedResponse(result) {
+  try {
+    const modifiedHits = result.hits.hits.map((hit) => {
+      const sourceKeys = Object.keys(hit._source);
+      const highlightKeys = Object.keys(hit.highlight);
+  
+      sourceKeys.forEach((sourceKey) => {
+        if (sourceKey === "meaning") {
+          temp_sourceKey = "meaning.case_insensitive_and_inflections";
+          if (highlightKeys.includes(temp_sourceKey)) {
+            hit._source[sourceKey] = hit.highlight[temp_sourceKey][0];
+          }
+        } else if (highlightKeys.includes(sourceKey)) {
+          hit._source[sourceKey] = hit.highlight[sourceKey][0];
+        }
+      });
+  
+      return hit;
+    });
+  
+    return {
+      hits: modifiedHits,
+    };
+  }catch {
+    return {
+      hits: [],
+    };
+  }
+}
+
+app.post("/author", async (req, res, next) => {
+  const { phrase } = req.body;
+  const result = await client.search({
+    index: "metaphors",
+    body: {
+      size: 75,
+      query: {
+        bool: {
+          should: [
+            {
+              match: { poet: { query: phrase } },
+            },
+          ],
+        },
+      },
+      highlight: {
+        fields: {
+          poet: {},
+        },
+        pre_tags: '"',
+        post_tags: '"',
+      },
+    },
+  });
+
+  res.json(getModifiedResponse(result));
+});
+
+app.post("/poem", async (req, res, next) => {
+  const { phrase } = req.body;
+  const result = await client.search({
+    index: "metaphors",
+    body: {
+      size: 75,
+      query: {
+        bool: {
+          should: [
+            {
+              match: { poem_name: { query: phrase } },
+            },
+          ],
+        },
+      },
+      highlight: {
+        fields: {
+          poet: {},
+        },
+        pre_tags: '"',
+        post_tags: '"',
+      },
+    },
+  });
+
+  res.json(getModifiedResponse(result));
+});
+
+app.post("/source", async (req, res, next) => {
+  const { phrase } = req.body;
+  const result = await client.search({
+    index: "metaphors",
+    body: {
+      size: 75,
+      query: {
+        bool: {
+          should: [
+            {
+              match: { source_domain: { query: phrase } },
+            },
+          ],
+        },
+      },
+      highlight: {
+        fields: {
+          poet: {},
+        },
+        pre_tags: '"',
+        post_tags: '"',
+      },
+    },
+  });
+  res.json(getModifiedResponse(result));
+});
+
+app.post("/target", async (req, res, next) => {
+  const { phrase } = req.body;
+  const result = await client.search({
+    index: "metaphors",
+    body: {
+      size: 75,
+      query: {
+        bool: {
+          should: [
+            {
+              match: { target_domain: { query: phrase } },
+            },
+          ],
+        },
+      },
+      highlight: {
+        fields: {
+          poet: {},
+        },
+        pre_tags: '"',
+        post_tags: '"',
+      },
+    },
+  });
+  res.json(getModifiedResponse(result));
+});
 
 app.post("/search", async (req, res, next) => {
-  console.log("Request from frontent")
-  console.log(req.body)
-  const {phrase} = req.body;
+  console.log(`Request for  ${req.body.phrase}`);
+  const { phrase } = req.body;
   const result = await client.search({
     index: "metaphors",
     body: {
@@ -64,34 +204,12 @@ app.post("/search", async (req, res, next) => {
           target_domain: {},
           "meaning.case_insensitive_and_inflections": {},
         },
-        pre_tags: "Typography>",
-        post_tags: "</Typography>",
+        pre_tags: '"',
+        post_tags: '"',
       },
     },
   });
-  const modifiedHits = result.hits.hits.map((hit) => {
-    const sourceKeys = Object.keys(hit._source);
-    const highlightKeys = Object.keys(hit.highlight);
-
-    sourceKeys.forEach((sourceKey) => {
-      if (sourceKey === "meaning") {
-        temp_sourceKey = "meaning.case_insensitive_and_inflections";
-        if (highlightKeys.includes(temp_sourceKey)) {
-          hit._source[sourceKey] = hit.highlight[temp_sourceKey][0];
-        }
-      } else if (highlightKeys.includes(sourceKey)) {
-        hit._source[sourceKey] = hit.highlight[sourceKey][0];
-      }
-    });
-
-    return hit;
-  });
-
-  const modifiedResult = {
-    hits: modifiedHits,
-  };
-  console.log(modifiedResult)
-  res.json(modifiedResult);
+  res.json(getModifiedResponse(result));
 });
 
 // app listen with port
