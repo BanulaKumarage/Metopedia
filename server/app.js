@@ -47,6 +47,7 @@ function getModifiedResponse(result) {
 }
 
 app.post("/author", async (req, res, next) => {
+  console.log(`Request for  ${req.body.phrase}`);
   const { phrase } = req.body;
   const result = await client.search({
     index: "metaphors",
@@ -75,6 +76,7 @@ app.post("/author", async (req, res, next) => {
 });
 
 app.post("/poem", async (req, res, next) => {
+  console.log(`Request for  ${req.body.phrase}`);
   const { phrase } = req.body;
   const result = await client.search({
     index: "metaphors",
@@ -103,6 +105,7 @@ app.post("/poem", async (req, res, next) => {
 });
 
 app.post("/source", async (req, res, next) => {
+  console.log(`Request for  ${req.body.phrase}`);
   const { phrase } = req.body;
   const result = await client.search({
     index: "metaphors",
@@ -130,6 +133,7 @@ app.post("/source", async (req, res, next) => {
 });
 
 app.post("/target", async (req, res, next) => {
+  console.log(`Request for  ${req.body.phrase}`);
   const { phrase } = req.body;
   const result = await client.search({
     index: "metaphors",
