@@ -10,7 +10,6 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 
 export default function MetaphorsTable({ data }) {
-  
   const [pg, setpg] = React.useState(0);
   const [rpg, setrpg] = React.useState(5);
 
@@ -47,20 +46,50 @@ export default function MetaphorsTable({ data }) {
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                {metaphor._source.poem_name}
-              </TableCell>
-              <TableCell align="right">{metaphor._source.poet}</TableCell>
-              <TableCell align="right">{metaphor._source.line}</TableCell>
-              <TableCell align="right">
-                {metaphor._source.metaphorical_terms}
-              </TableCell>
-              <TableCell align="right">
-                {metaphor._source.source_domain}
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: metaphor._source.poem_name,
+                  }}
+                />
               </TableCell>
               <TableCell align="right">
-                {metaphor._source.target_domain}
+                {" "}
+                <div
+                  dangerouslySetInnerHTML={{ __html: metaphor._source.poet }}
+                />{" "}
               </TableCell>
-              <TableCell align="right">{metaphor._source.meaning}</TableCell>
+              <TableCell align="right">
+                {" "}
+                <div
+                  dangerouslySetInnerHTML={{ __html: metaphor._source.line }}
+                />{" "}
+              </TableCell>
+              <TableCell align="right">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: metaphor._source.metaphorical_terms,
+                  }}
+                />
+              </TableCell>
+              <TableCell align="right">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: metaphor._source.soruce_domain,
+                  }}
+                />
+              </TableCell>
+              <TableCell align="right">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: metaphor._source.target_domain,
+                  }}
+                />
+              </TableCell>
+              <TableCell align="right">
+                <div
+                  dangerouslySetInnerHTML={{ __html: metaphor._source.meaning }}
+                />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -75,9 +104,11 @@ export default function MetaphorsTable({ data }) {
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
     </TableContainer>
-  ) : (data==null || data.length==0) && (
-    <Typography fontSize={13} fontStyle={"italic"}>
-      No results found
-    </Typography>
+  ) : (
+    (data == null || data.length == 0) && (
+      <Typography fontSize={13} fontStyle={"italic"}>
+        No results found
+      </Typography>
+    )
   );
 }

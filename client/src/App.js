@@ -117,6 +117,7 @@ function App() {
                 <MenuItem value={"poem"}>Poem</MenuItem>
                 <MenuItem value={"source"}>Source Domain</MenuItem>
                 <MenuItem value={"target"}>Target Domain</MenuItem>
+                <MenuItem value={"meaning"}>Meaning</MenuItem>
               </Select>
             </FormControl>
           </Grid>

@@ -10,6 +10,9 @@ const client = new Client({
   node: "http://localhost:9200",
 });
 
+const pre_tag = '<strong><i>';
+const post_tag = '</strong></i>';
+
 app.get("/health", async (req, res) => {
   const health = await client.cluster.health();
   res.json(health);
@@ -21,7 +24,7 @@ function getModifiedResponse(result) {
     const modifiedHits = result.hits.hits.map((hit) => {
       const sourceKeys = Object.keys(hit._source);
       const highlightKeys = Object.keys(hit.highlight);
-  
+
       sourceKeys.forEach((sourceKey) => {
         if (sourceKey === "meaning") {
           temp_sourceKey = "meaning.case_insensitive_and_inflections";
@@ -32,14 +35,14 @@ function getModifiedResponse(result) {
           hit._source[sourceKey] = hit.highlight[sourceKey][0];
         }
       });
-  
+
       return hit;
     });
-  
+
     return {
       hits: modifiedHits,
     };
-  }catch {
+  } catch {
     return {
       hits: [],
     };
@@ -66,8 +69,8 @@ app.post("/author", async (req, res, next) => {
         fields: {
           poet: {},
         },
-        pre_tags: '"',
-        post_tags: '"',
+        pre_tags: pre_tag,
+        post_tags: post_tag,
       },
     },
   });
@@ -95,8 +98,8 @@ app.post("/poem", async (req, res, next) => {
         fields: {
           poet: {},
         },
-        pre_tags: '"',
-        post_tags: '"',
+        pre_tags: pre_tag,
+        post_tags: post_tag,
       },
     },
   });
@@ -124,8 +127,8 @@ app.post("/source", async (req, res, next) => {
         fields: {
           poet: {},
         },
-        pre_tags: '"',
-        post_tags: '"',
+        pre_tags: pre_tag,
+        post_tags: post_tag,
       },
     },
   });
@@ -152,14 +155,43 @@ app.post("/target", async (req, res, next) => {
         fields: {
           poet: {},
         },
-        pre_tags: '"',
-        post_tags: '"',
+        pre_tags: pre_tag,
+        post_tags: post_tag,
       },
     },
   });
   res.json(getModifiedResponse(result));
 });
 
+app.post("/meaning", async (req, res, next) => {
+  console.log(`Request for  Mode: Meaning - ${req.body.phrase}`);
+  const { phrase } = req.body;
+  const result = await client.search({
+    index: "metaphors",
+    body: {
+      size: 75,
+      query: {
+        bool: {
+          should: [
+            {
+              match: {
+                "meaning.case_insensitive_and_inflections": { query: phrase },
+              },
+            },
+          ],
+        },
+      },
+      highlight: {
+        fields: {
+          "meaning.case_insensitive_and_inflections": {},
+        },
+        pre_tags: pre_tag,
+        post_tags: post_tag,
+      },
+    },
+  });
+  res.json(getModifiedResponse(result));
+});
 app.post("/search", async (req, res, next) => {
   console.log(`Request for  Mode: Search - ${req.body.phrase}`);
   const { phrase } = req.body;
@@ -208,8 +240,8 @@ app.post("/search", async (req, res, next) => {
           target_domain: {},
           "meaning.case_insensitive_and_inflections": {},
         },
-        pre_tags: '"',
-        post_tags: '"',
+        pre_tags: pre_tag,
+        post_tags: post_tag,
       },
     },
   });
