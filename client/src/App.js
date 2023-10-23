@@ -122,6 +122,11 @@ function App() {
             </FormControl>
           </Grid>
         </Grid>
+        {data.hits && data.hits.length != 0 && (
+          <Typography fontSize={13} fontStyle={"italic"}>
+            Number of results: {data.hits.length}
+          </Typography>
+        )}
         <MetaphorsTable data={data.hits} />
       </Container>
     </ThemeProvider>

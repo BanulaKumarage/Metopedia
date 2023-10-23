@@ -125,7 +125,7 @@ app.post("/source", async (req, res, next) => {
       },
       highlight: {
         fields: {
-          poet: {},
+          source_domain: {},
         },
         pre_tags: pre_tag,
         post_tags: post_tag,
@@ -153,7 +153,7 @@ app.post("/target", async (req, res, next) => {
       },
       highlight: {
         fields: {
-          poet: {},
+          target_domain: {},
         },
         pre_tags: pre_tag,
         post_tags: post_tag,
@@ -192,6 +192,37 @@ app.post("/meaning", async (req, res, next) => {
   });
   res.json(getModifiedResponse(result));
 });
+
+app.post("/advanced-search", async (req, res, next) => {
+  console.log(`Request for  Mode: Advanced Search - ${req.body.phrase}`);
+  const { phrase } = req.body;
+  const result = await client.search({
+    index: "metaphors",
+    body: {
+      size: 75,
+      query: {
+        "query_string": {
+          "fields": [ "poem_name", "poet", "line", "metaphorical_terms", "source_domain", "target_domain", "meaning.case_insensitive_and_inflections"],
+          "query": phrase
+        }
+      },
+      highlight: {
+        fields: {
+          poem_name: {},
+          poet: {},
+          line: {},
+          metaphorical_terms: {},
+          source_domain: {},
+          target_domain: {},
+          "meaning.case_insensitive_and_inflections": {},
+        },
+        pre_tags: pre_tag,
+        post_tags: post_tag,
+      }
+    }
+  });
+});
+
 app.post("/search", async (req, res, next) => {
   console.log(`Request for  Mode: Search - ${req.body.phrase}`);
   const { phrase } = req.body;
@@ -200,35 +231,10 @@ app.post("/search", async (req, res, next) => {
     body: {
       size: 75,
       query: {
-        bool: {
-          should: [
-            {
-              match: { poem_name: { query: phrase, operator: "AND" } },
-            },
-            {
-              match: { poet: { query: phrase, operator: "AND" } },
-            },
-            {
-              match: { line: { query: phrase, operator: "AND" } },
-            },
-            {
-              match: { metaphorical_terms: { query: phrase, operator: "AND" } },
-            },
-            {
-              match: { source_domain: { query: phrase, operator: "AND" } },
-            },
-            {
-              match: { target_domain: { query: phrase, operator: "AND" } },
-            },
-            {
-              match: {
-                "meaning.case_insensitive_and_inflections": {
-                  query: phrase,
-                },
-              },
-            },
-          ],
-        },
+        "multi_match": {
+          "query": phrase,
+          "fields": [ "poem_name", "poet", "line", "metaphorical_terms", "source_domain", "target_domain", "meaning.case_insensitive_and_inflections"]
+        }
       },
       highlight: {
         fields: {
