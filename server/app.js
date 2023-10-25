@@ -221,6 +221,7 @@ app.post("/advanced-search", async (req, res, next) => {
       }
     }
   });
+  res.json(getModifiedResponse(result));
 });
 
 app.post("/search", async (req, res, next) => {
