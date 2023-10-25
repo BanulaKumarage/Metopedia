@@ -15,7 +15,7 @@ import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 function App() {
   const [phrase, setPhrase] = useState("");
   const [data, setData] = useState([]);
-  const [mode, setMode] = useState("search");
+  const [mode, setMode] = useState("advanced-search");
 
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
@@ -112,7 +112,7 @@ function App() {
                   setMode(e.target.value);
                 }}
               >
-                <MenuItem value={"search"}>All</MenuItem>
+                <MenuItem value={"advanced-search"}>All</MenuItem>
                 <MenuItem value={"author"}>Author</MenuItem>
                 <MenuItem value={"poem"}>Poem</MenuItem>
                 <MenuItem value={"source"}>Source Domain</MenuItem>
